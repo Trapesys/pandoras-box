@@ -7,7 +7,7 @@
     "license": "Apache-2.0",
     "devDependencies": {
         "@types/cli-progress": "^3.11.0",
-        "@types/node": "^18.7.6",
+        "@types/node": "^18.7.18",
         "@typescript-eslint/eslint-plugin": "^5.33.1",
         "@typescript-eslint/parser": "^5.33.1",
         "eslint": "^8.22.0",
