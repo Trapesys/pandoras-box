@@ -113,38 +113,6 @@ class EOARuntime {
         Logger.success('Gathered initial nonce data\n');
     }
 
-    async getNonceData(accountIndexes: number[]): Promise<Map<number, number>> {
-        Logger.info('Gathering initial account nonces...');
-
-        // Maps the account index -> starting nonce
-        const startingNonces: Map<number, number> = new Map<number, number>();
-        const nonceBar = new SingleBar({
-            barCompleteChar: '\u2588',
-            barIncompleteChar: '\u2591',
-            hideCursor: true,
-        });
-
-        nonceBar.start(accountIndexes.length, 0, {
-            speed: 'N/A',
-        });
-
-        for (const accIndex of accountIndexes) {
-            const wallet = Wallet.fromMnemonic(
-                this.mnemonic,
-                `m/44'/60'/0'/0/${accIndex}`
-            ).connect(this.provider);
-
-            startingNonces.set(accIndex, await wallet.getTransactionCount());
-            nonceBar.increment();
-        }
-
-        nonceBar.stop();
-
-        Logger.success('Gathered initial nonce data\n');
-
-        return startingNonces;
-    }
-
     async batchTransactions(
         numTxs: number,
         signedTxs: string[]
