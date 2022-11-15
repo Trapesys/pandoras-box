@@ -116,6 +116,7 @@ class Signer {
         }
 
         signBar.stop();
+        Logger.success(`Successfully signed ${signedTxs.length} transactions`);
 
         if (failedTxnSignErrors.length > 0) {
             Logger.warn('Errors encountered during transaction signing:');

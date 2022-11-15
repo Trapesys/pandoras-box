@@ -6,6 +6,7 @@ import {
     TransactionRequest,
 } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
+import { SingleBar } from 'cli-progress';
 import ZexCoin from '../contracts/ZexCoinERC20.json';
 import Logger from '../logger/logger';
 import RuntimeErrors from './errors';
@@ -133,6 +134,17 @@ class ERC20Runtime {
         Logger.info(`Chain ID: ${chainID}`);
         Logger.info(`Avg. gas price: ${gasPrice.toHexString()}`);
 
+        const constructBar = new SingleBar({
+            barCompleteChar: '\u2588',
+            barIncompleteChar: '\u2591',
+            hideCursor: true,
+        });
+
+        Logger.info('\nConstructing transactions...');
+        constructBar.start(numTx, 0, {
+            speed: 'N/A',
+        });
+
         const transactions: TransactionRequest[] = [];
 
         for (let i = 0; i < numTx; i++) {
@@ -168,7 +180,11 @@ class ERC20Runtime {
             transactions.push(transaction);
 
             sender.incrNonce();
+            constructBar.increment();
         }
+
+        constructBar.stop();
+        Logger.success(`Successfully constructed ${numTx} transactions`);
 
         return transactions;
     }
