@@ -5,12 +5,12 @@ It is made for Ethereum-compatible blockchain networks, such as Ethereum network
 
 The key features of `pandoras-box` are the following:
 
-- ✅ Supports transaction batching, making stress testing orchestration hassle-free
-- ✅ Supports multiple stress testing modes
-- ✅ Supports distributed transaction stress testing through subaccounts
-- ✅ Automatic subaccount fund top-off
-- ✅ Has detailed statistics calculation
-- ✅ Has support for outputting cycle-run results
+-   ✅ Supports transaction batching, making stress testing orchestration hassle-free
+-   ✅ Supports multiple stress testing modes
+-   ✅ Supports distributed transaction stress testing through subaccounts
+-   ✅ Automatic subaccount fund top-off
+-   ✅ Has detailed statistics calculation
+-   ✅ Has support for outputting cycle-run results
 
 # Usage Example
 
