@@ -68,12 +68,6 @@ When the cycle run begins, the transactions that are sent out are ERC20 token tr
 The `ERC721` mode deploys an ERC721 NFT contract to the blockchain network being tested before starting the cycle run.
 When the cycle run begins, the transactions that are sent out are ERC721 NFT mints.
 
-## GREETER ⚠️WIP
-
-The `GREETER` mode is rather simple - it consists of deploying a standard `Greeter.sol` Smart Contract to the blockchain
-network.
-The transactions being sent out are Smart Contract calls, namely calls to the `greet()` method.
-
 # License
 
 Copyright 2022 Trapesys
