@@ -27,4 +27,24 @@ export interface Runtime {
 
     // Returns the start message for the user output
     GetStartMessage(): string;
+
+    // Initializes the runtime
+    Initialize(): Promise<void>;
+}
+
+export interface TokenRuntime extends Runtime {
+    // Returns the transfer token value
+    GetTransferValue(): number;
+
+    // Returns the token balance for the specified address
+    GetTokenBalance(address: string): Promise<number>;
+
+    // Returns the suppliers token balance
+    GetSupplierBalance(): Promise<number>;
+
+    // Returns the token name
+    GetTokenName(): string;
+
+    // Funds the specified account
+    FundAccount(address: string, amount: number): Promise<void>;
 }

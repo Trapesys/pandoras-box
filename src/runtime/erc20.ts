@@ -1,4 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber';
+import { Contract, ContractFactory } from '@ethersproject/contracts';
 import {
     JsonRpcProvider,
     Provider,
@@ -6,10 +7,11 @@ import {
 } from '@ethersproject/providers';
 import { parseUnits } from '@ethersproject/units';
 import { Wallet } from '@ethersproject/wallet';
+import ZexCoin from '../contracts/ZexCoinERC20.json';
 import Logger from '../logger/logger';
 import { senderAccount } from './signer';
 
-class EOARuntime {
+class ERC20Runtime {
     mnemonic: string;
     url: string;
     provider: Provider;
@@ -17,28 +19,86 @@ class EOARuntime {
     gasEstimation: BigNumber = BigNumber.from(0);
     gasPrice: BigNumber = BigNumber.from(0);
 
-    // The default value for the E0A to E0A transfers
-    // is 0.0001 native currency
-    defaultValue: BigNumber = parseUnits('0.0001');
+    defaultValue: BigNumber = parseUnits('0.0');
+    defaultTransferValue: number = 0.001;
+
+    totalSupply: number = 500000000000;
+    coinName: string = 'Zex Coin';
+    coinSymbol: string = 'ZEX';
+
+    contract: Contract | undefined;
+
+    baseDeployer: Wallet;
 
     constructor(mnemonic: string, url: string) {
         this.mnemonic = mnemonic;
         this.provider = new JsonRpcProvider(url);
         this.url = url;
+
+        this.baseDeployer = Wallet.fromMnemonic(
+            this.mnemonic,
+            `m/44'/60'/0'/0/0`
+        );
     }
 
-    async Initialize(): Promise<void> {}
+    async Initialize() {
+        //  Deploy the contract
+        const address = await this.deployERC20();
+
+        // Initialize it
+        this.contract = new Contract(address, ZexCoin.abi, this.provider);
+    }
+
+    async deployERC20(): Promise<string> {
+        const contract = await new ContractFactory(
+            ZexCoin.abi,
+            ZexCoin.bytecode,
+            this.baseDeployer
+        ).deploy(this.totalSupply, this.coinName, this.coinSymbol);
+
+        return contract.address;
+    }
 
     async EstimateBaseTx(): Promise<BigNumber> {
-        // EOA to EOA transfers are simple value transfers between accounts
-        this.gasEstimation = await this.provider.estimateGas({
-            from: Wallet.fromMnemonic(this.mnemonic, `m/44'/60'/0'/0/0`)
-                .address,
-            to: Wallet.fromMnemonic(this.mnemonic, `m/44'/60'/0'/0/1`).address,
-            value: this.defaultValue,
-        });
+        if (!this.contract) {
+            return BigNumber.from(0);
+        }
+
+        // Estimate a simple transfer transaction
+        this.gasEstimation = await this.contract.estimateGas.transfer(
+            Wallet.fromMnemonic(this.mnemonic, `m/44'/60'/0'/0/1`).address,
+            this.defaultTransferValue
+        );
 
         return this.gasEstimation;
+    }
+
+    GetTransferValue(): number {
+        return this.defaultTransferValue;
+    }
+
+    async GetTokenBalance(address: string): Promise<number> {
+        if (!this.contract) {
+            return 0;
+        }
+
+        return await this.contract.balanceOf(address);
+    }
+
+    async GetSupplierBalance(): Promise<number> {
+        return this.GetTokenBalance(this.baseDeployer.address);
+    }
+
+    async FundAccount(to: string, amount: number): Promise<void> {
+        if (!this.contract) {
+            return;
+        }
+
+        await this.contract.transfer(to, amount);
+    }
+
+    GetTokenName(): string {
+        return this.coinName;
     }
 
     GetValue(): BigNumber {
@@ -92,8 +152,8 @@ class EOARuntime {
     }
 
     GetStartMessage(): string {
-        return '\n⚡️ EOA to EOA transfers initialized ️⚡️\n';
+        return '\n⚡️ ERC20 token transfers initialized ️⚡️\n';
     }
 }
 
-export default EOARuntime;
+export default ERC20Runtime;
