@@ -43,7 +43,7 @@ export interface TokenRuntime extends Runtime {
     GetSupplierBalance(): Promise<number>;
 
     // Returns the token name
-    GetTokenName(): string;
+    GetTokenSymbol(): string;
 
     // Funds the specified account
     FundAccount(address: string, amount: number): Promise<void>;

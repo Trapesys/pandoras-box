@@ -41,7 +41,7 @@ async function run() {
             '2000'
         )
         .option(
-            '-m, --mode <mode>',
+            '--mode <mode>',
             'The mode for the stress test. Possible modes: [EOA, ERC20, ERC721, GREETER]',
             'EOA'
         )

@@ -39,7 +39,7 @@ class TokenDistributor {
     }
 
     async distributeTokens(): Promise<number[]> {
-        Logger.title('🪙 Token distribution initialized 🪙');
+        Logger.title('\n🪙 Token distribution initialized 🪙');
 
         const baseCosts = await this.calculateRuntimeCosts();
         this.printCostTable(baseCosts);
@@ -133,6 +133,7 @@ class TokenDistributor {
         }
 
         balanceBar.stop();
+        Logger.success('Fetched initial token balances');
 
         return shortAddresses;
     }
@@ -140,7 +141,7 @@ class TokenDistributor {
     printCostTable(costs: tokenRuntimeCosts) {
         Logger.info('\nCycle Token Cost Table:');
         const costTable = new Table({
-            head: ['Name', `Cost [${this.tokenRuntime.GetTokenName()}]`],
+            head: ['Name', `Cost [${this.tokenRuntime.GetTokenSymbol()}]`],
         });
 
         costTable.push(

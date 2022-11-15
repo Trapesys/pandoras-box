@@ -5,10 +5,10 @@ import {
     Provider,
     TransactionRequest,
 } from '@ethersproject/providers';
-import { parseUnits } from '@ethersproject/units';
 import { Wallet } from '@ethersproject/wallet';
 import ZexCoin from '../contracts/ZexCoinERC20.json';
 import Logger from '../logger/logger';
+import RuntimeErrors from './errors';
 import { senderAccount } from './signer';
 
 class ERC20Runtime {
@@ -19,8 +19,8 @@ class ERC20Runtime {
     gasEstimation: BigNumber = BigNumber.from(0);
     gasPrice: BigNumber = BigNumber.from(0);
 
-    defaultValue: BigNumber = parseUnits('0.0');
-    defaultTransferValue: number = 0.001;
+    defaultValue: BigNumber = BigNumber.from(0);
+    defaultTransferValue: number = 1;
 
     totalSupply: number = 500000000000;
     coinName: string = 'Zex Coin';
@@ -38,30 +38,35 @@ class ERC20Runtime {
         this.baseDeployer = Wallet.fromMnemonic(
             this.mnemonic,
             `m/44'/60'/0'/0/0`
-        );
+        ).connect(this.provider);
     }
 
     async Initialize() {
-        //  Deploy the contract
-        const address = await this.deployERC20();
-
         // Initialize it
-        this.contract = new Contract(address, ZexCoin.abi, this.provider);
+        this.contract = await this.deployERC20();
     }
 
-    async deployERC20(): Promise<string> {
-        const contract = await new ContractFactory(
+    async deployERC20(): Promise<Contract> {
+        const contractFactory = new ContractFactory(
             ZexCoin.abi,
             ZexCoin.bytecode,
             this.baseDeployer
-        ).deploy(this.totalSupply, this.coinName, this.coinSymbol);
+        );
 
-        return contract.address;
+        const contract = await contractFactory.deploy(
+            this.totalSupply,
+            this.coinName,
+            this.coinSymbol
+        );
+
+        await contract.deployTransaction.wait();
+
+        return contract;
     }
 
     async EstimateBaseTx(): Promise<BigNumber> {
         if (!this.contract) {
-            return BigNumber.from(0);
+            throw RuntimeErrors.errRuntimeNotInitialized;
         }
 
         // Estimate a simple transfer transaction
@@ -79,7 +84,7 @@ class ERC20Runtime {
 
     async GetTokenBalance(address: string): Promise<number> {
         if (!this.contract) {
-            return 0;
+            throw RuntimeErrors.errRuntimeNotInitialized;
         }
 
         return await this.contract.balanceOf(address);
@@ -91,14 +96,17 @@ class ERC20Runtime {
 
     async FundAccount(to: string, amount: number): Promise<void> {
         if (!this.contract) {
-            return;
+            throw RuntimeErrors.errRuntimeNotInitialized;
         }
 
-        await this.contract.transfer(to, amount);
+        const tx = await this.contract.transfer(to, amount);
+
+        // Wait for the transfer transaction to be mined
+        await tx.wait();
     }
 
-    GetTokenName(): string {
-        return this.coinName;
+    GetTokenSymbol(): string {
+        return this.coinSymbol;
     }
 
     GetValue(): BigNumber {
@@ -115,12 +123,11 @@ class ERC20Runtime {
         accounts: senderAccount[],
         numTx: number
     ): Promise<TransactionRequest[]> {
-        const queryWallet = Wallet.fromMnemonic(
-            this.mnemonic,
-            `m/44'/60'/0'/0/0`
-        ).connect(this.provider);
+        if (!this.contract) {
+            throw RuntimeErrors.errRuntimeNotInitialized;
+        }
 
-        const chainID = await queryWallet.getChainId();
+        const chainID = await this.baseDeployer.getChainId();
         const gasPrice = this.gasPrice;
 
         Logger.info(`Chain ID: ${chainID}`);
@@ -135,15 +142,30 @@ class ERC20Runtime {
             const sender = accounts[senderIndex];
             const receiver = accounts[receiverIndex];
 
-            transactions.push({
-                from: sender.getAddress(),
-                chainId: chainID,
-                to: receiver.getAddress(),
-                gasPrice: gasPrice,
-                gasLimit: this.gasEstimation,
-                value: this.defaultValue,
-                nonce: sender.getNonce(),
-            });
+            const wallet = Wallet.fromMnemonic(
+                this.mnemonic,
+                `m/44'/60'/0'/0/${senderIndex}`
+            ).connect(this.provider);
+
+            const contract = new Contract(
+                this.contract.address,
+                ZexCoin.abi,
+                wallet
+            );
+
+            const transaction = await contract.populateTransaction.transfer(
+                receiver.getAddress(),
+                this.defaultTransferValue
+            );
+
+            // Override the defaults
+            transaction.from = sender.getAddress();
+            transaction.chainId = chainID;
+            transaction.gasPrice = gasPrice;
+            transaction.gasLimit = this.gasEstimation;
+            transaction.nonce = sender.getNonce();
+
+            transactions.push(transaction);
 
             sender.incrNonce();
         }
