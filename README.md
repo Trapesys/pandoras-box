@@ -5,12 +5,12 @@ It is made for Ethereum-compatible blockchain networks, such as Ethereum network
 
 The key features of `pandoras-box` are the following:
 
--   ✅ Supports transaction batching, making stress testing orchestration hassle-free
--   ✅ Supports multiple stress testing modes
--   ✅ Supports distributed transaction stress testing through subaccounts
--   ✅ Automatic subaccount fund top-off
--   ✅ Has detailed statistics calculation
--   ✅ Has support for outputting cycle-run results
+- ✅ Supports transaction batching, making stress testing orchestration hassle-free
+- ✅ Supports multiple stress testing modes
+- ✅ Supports distributed transaction stress testing through subaccounts
+- ✅ Automatic subaccount fund top-off
+- ✅ Has detailed statistics calculation
+- ✅ Has support for outputting cycle-run results
 
 # Usage Example
 
@@ -58,7 +58,7 @@ pandoras-box -url http://127.0.0.1:10002 -m "erupt oven loud noise rug proof sun
 The `EOA` mode is pretty straightforward - it is a simple value transfer mode between regular Ethereum accounts.
 This mode sends out transactions with a certain value transfer between subaccounts.
 
-## ERC20 ⚠️WIP
+## ERC20
 
 The `ERC20` mode deploys an ERC20 token to the blockchain network being tested before starting the cycle run.
 When the cycle run begins, the transactions that are sent out are ERC20 token transfers between subaccounts.
