@@ -60,7 +60,7 @@ class Signer {
             speed: 'N/A',
         });
 
-        let accounts: senderAccount[] = [];
+        const accounts: senderAccount[] = [];
         for (let i = 0; i < walletsToInit; i++) {
             const accIndex = accountIndexes[i];
 

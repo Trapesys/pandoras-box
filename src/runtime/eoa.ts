@@ -28,8 +28,6 @@ class EOARuntime {
         this.url = url;
     }
 
-    async Initialize(): Promise<void> {}
-
     async EstimateBaseTx(): Promise<BigNumber> {
         // EOA to EOA transfers are simple value transfers between accounts
         this.gasEstimation = await this.provider.estimateGas({

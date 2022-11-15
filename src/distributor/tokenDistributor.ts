@@ -108,7 +108,7 @@ class TokenDistributor {
             speed: 'N/A',
         });
 
-        for (let index of this.readyMnemonicIndexes) {
+        for (const index of this.readyMnemonicIndexes) {
             const addrWallet = Wallet.fromMnemonic(
                 this.mnemonic,
                 `m/44'/60'/0'/0/${index}`

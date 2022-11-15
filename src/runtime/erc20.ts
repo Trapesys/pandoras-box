@@ -21,11 +21,11 @@ class ERC20Runtime {
     gasPrice: BigNumber = BigNumber.from(0);
 
     defaultValue: BigNumber = BigNumber.from(0);
-    defaultTransferValue: number = 1;
+    defaultTransferValue = 1;
 
-    totalSupply: number = 500000000000;
-    coinName: string = 'Zex Coin';
-    coinSymbol: string = 'ZEX';
+    totalSupply = 500000000000;
+    coinName = 'Zex Coin';
+    coinSymbol = 'ZEX';
 
     contract: Contract | undefined;
 

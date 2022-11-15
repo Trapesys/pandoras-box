@@ -75,13 +75,13 @@ async function run() {
         case RuntimeType.ERC20:
             runtime = new ERC20Runtime(mnemonic, url);
 
+            // Initialize the runtime
+            await (runtime as TokenRuntime).Initialize();
+
             break;
         default:
             throw RuntimeErrors.errUnknownRuntime;
     }
-
-    // Initialize the runtime
-    await runtime.Initialize();
 
     // Distribute the native currency funds
     const distributor = new Distributor(

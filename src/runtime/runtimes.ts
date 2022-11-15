@@ -27,12 +27,12 @@ export interface Runtime {
 
     // Returns the start message for the user output
     GetStartMessage(): string;
-
-    // Initializes the runtime
-    Initialize(): Promise<void>;
 }
 
 export interface TokenRuntime extends Runtime {
+    // Initializes the runtime
+    Initialize(): Promise<void>;
+
     // Returns the transfer token value
     GetTransferValue(): number;
 
